@@ -148,10 +148,11 @@ http://localhost:3000
    INFINI_KEY_ID=...
    INFINI_SECRET_KEY=...
    INFINI_WEBHOOK_SECRET=...
-   ANTHROPIC_BASE_URL=https://api.ikuncode.cc
    ANTHROPIC_API_KEY=...
-   ANTHROPIC_MODEL=...
+   ANTHROPIC_MODEL=claude-haiku-4-5
    ```
+
+   `ANTHROPIC_BASE_URL` 仅在使用 Anthropic 兼容代理时才需要填写。
 
    `APP_BASE_URL` 必须是线上部署域名，不能是 `localhost`，末尾不要带 `/`。
 
@@ -252,18 +253,13 @@ npm run eval
 
 测试集覆盖正常输入、美元/人民币边界、加密货币表述、提示词注入、缺少价格、缺少商品和非法金额。
 
-## 生产环境说明
-
-这是面试作业 demo，但实现中保留了几个生产支付系统会关注的点：
+## 设计取舍
 
 - 金额使用 `Decimal`，不使用浮点数。
 - 创建 checkout 使用幂等 `requestId`。
 - 已支付订单不会被后续旧状态回退。
 - webhook 会验签并去重。
 - AI 输出会在进入支付数据前再次校验。
-
-demo 范围内的取舍：
-
-- API 路由没有鉴权。生产环境应增加商家鉴权、API key 或 session 中间件。
-- 当前没有全局限流。生产环境应保护 `/api/parse` 和 `/api/orders`。
-- Infini 请求目前是基础失败处理。生产环境应增加超时和指数退避重试。
+- 每个 checkout URL 对应一次买家付款；同一商品卖给多个买家会生成多笔订单。
+- 应用使用 Infini 沙盒环境。
+- 当前版本的 API 路由未做鉴权。接入真实商家账户时，应在鉴权和按用户限流之后调用，Infini 请求也应加上超时和指数退避重试。

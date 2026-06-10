@@ -148,10 +148,11 @@ The repository is ready for Vercel.
    INFINI_KEY_ID=...
    INFINI_SECRET_KEY=...
    INFINI_WEBHOOK_SECRET=...
-   ANTHROPIC_BASE_URL=https://api.ikuncode.cc
    ANTHROPIC_API_KEY=...
-   ANTHROPIC_MODEL=...
+   ANTHROPIC_MODEL=claude-haiku-4-5
    ```
+
+   `ANTHROPIC_BASE_URL` is only needed when using an Anthropic-compatible proxy.
 
    `APP_BASE_URL` must be the deployed URL, not `localhost`, and should not end with `/`.
 
@@ -252,18 +253,13 @@ npm run eval
 
 The eval cases cover happy paths, USD/CNY boundaries, crypto wording, prompt injection, missing price, missing product, and invalid amounts.
 
-## Production Notes
-
-This is a take-home demo, but the implementation keeps several production payment concerns visible:
+## Design Choices
 
 - Amounts use `Decimal`, not floating point.
 - Checkout creation uses an idempotent `requestId`.
 - Paid orders are not downgraded by later stale status updates.
 - Webhooks are signature-verified and deduplicated.
 - AI output is revalidated before becoming payment data.
-
-Known demo tradeoffs:
-
-- API routes are not authenticated. Production should add merchant auth, API keys, or session middleware.
-- There is no global rate limit. Production should protect `/api/parse` and `/api/orders`.
-- Infini requests currently use simple failure handling. Production should add explicit timeouts and retry with backoff.
+- Each checkout URL is one buyer payment attempt; selling the same product to multiple buyers creates multiple orders.
+- The app uses the Infini sandbox.
+- API routes are open in this build. Behind a real merchant account they would sit behind authentication and per-user rate limiting, and Infini calls would add request timeouts and retry with backoff.
