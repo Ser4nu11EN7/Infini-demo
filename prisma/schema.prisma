@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  creating
+  pending
+  processing
+  paid
+  partial_paid
+  expired
+  failed
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  price       Decimal  @db.Decimal(18, 6)
+  currency    String   @default("USD")
+  description String?
+  createdAt   DateTime @default(now())
+
+  orders Order[]
+  events Event[]
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  infiniOrderId String?     @unique
+  requestId     String      @unique
+  checkoutUrl   String?
+  amount        Decimal     @db.Decimal(18, 6)
+  currency      String      @default("USD")
+  status        OrderStatus @default(creating)
+  rawStatus     String?
+  errorMessage  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  events Event[]
+
+  @@index([productId, status])
+  @@index([createdAt])
+}
+
+model ProcessedWebhookEvent {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  eventId     String   @unique
+  anonymousId String?
+  sessionId   String?
+  name        String
+  orderId     String?
+  order       Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  properties  Json?
+  createdAt   DateTime @default(now())
+
+  @@index([name, createdAt])
+  @@index([anonymousId, createdAt])
+  @@index([sessionId, createdAt])
+}

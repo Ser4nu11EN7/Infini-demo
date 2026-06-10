@@ -1,0 +1,47 @@
+# ===== 密钥 / 环境变量（绝不提交）=====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ===== 依赖 =====
+node_modules/
+.pnp
+.pnp.js
+
+# ===== Next.js / 构建产物 =====
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# ===== Prisma 本地数据库（如用 SQLite 本地开发）=====
+*.db
+*.sqlite
+*.sqlite3
+prisma/dev.db*
+
+# ===== 日志 / 缓存 =====
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.cache/
+.vercel/
+
+# ===== 编辑器 / 系统 =====
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db
+
+# ===== 本作业准备材料，不要进交付仓库（若仓库与准备材料同目录时排除）=====
+# 这些是含/曾含密钥的本地测试脚本和准备文档，交付仓库不应包含
+api-test/
+test-create-order.js
+test-variants.js
+*给Codex完整方案.md
+*UI样式骨架.md
+*项目方案.md
