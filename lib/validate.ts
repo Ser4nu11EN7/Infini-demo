@@ -21,7 +21,7 @@ const unsupportedCurrencyPricePattern = new RegExp(
   ].join("|"),
   "i"
 );
-const dollarWordsPattern = "美元|美金|刀|刀乐";
+const dollarWordsPattern = "美元|美金|刀|刀乐|u\\b";
 const supportedDollarPricePattern = new RegExp(
   [
     String.raw`(?:\$|USD\s*)\s*\d+(?:\.\d+)?`,

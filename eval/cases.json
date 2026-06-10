@@ -217,6 +217,20 @@
     "currency": "USD"
   },
   {
+    "input": "十u卖出一份报告",
+    "ok": true,
+    "productNameIncludes": "报告",
+    "price": "10",
+    "currency": "USD"
+  },
+  {
+    "input": "报告10u",
+    "ok": true,
+    "productNameIncludes": "报告",
+    "price": "10",
+    "currency": "USD"
+  },
+  {
     "input": "一份分析 5块",
     "ok": false,
     "reasonCode": "UNSUPPORTED_CURRENCY"

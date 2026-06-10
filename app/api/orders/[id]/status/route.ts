@@ -20,6 +20,10 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json({ ok: false, reason: "Order not found." }, { status: 404 });
   }
 
+  if (order.status === "paid") {
+    return NextResponse.json({ ok: true, order });
+  }
+
   if (!order.infiniOrderId) {
     return NextResponse.json({ ok: true, order });
   }
@@ -28,19 +32,13 @@ export async function GET(request: Request, context: RouteContext) {
     const remote = await queryInfiniOrder(order.infiniOrderId);
     const remoteStatus = remote.pay_status || remote.status;
     const normalized = normalizeInfiniStatus(remoteStatus);
-    const nextStatus =
-      order.status === "paid" && normalized.status !== "paid" ? order.status : normalized.status;
-    const nextRawStatus =
-      order.status === "paid" && normalized.status !== "paid"
-        ? order.rawStatus || "paid"
-        : normalized.rawStatus;
-    const becamePaid = order.status !== "paid" && nextStatus === "paid";
+    const becamePaid = normalized.status === "paid";
 
     const updated = await prisma.order.update({
       where: { id: order.id },
       data: {
-        status: nextStatus,
-        rawStatus: nextRawStatus,
+        status: normalized.status,
+        rawStatus: normalized.rawStatus,
       },
       include: { product: true },
     });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Check, Copy, ExternalLink, RefreshCw, Sparkles, Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { AppHeader } from "@/components/AppHeader";
@@ -24,6 +24,12 @@ type CheckoutResult = {
 
 type EditingField = "productName" | "amount" | null;
 
+const reviewerToolsEnabled = process.env.NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS === "true";
+
+function randomDelay(minMs: number, maxMs: number) {
+  return minMs + Math.floor(Math.random() * (maxMs - minMs + 1));
+}
+
 export default function DemoPage() {
   const { locale, t } = useI18n();
   const defaultInput =
@@ -40,11 +46,28 @@ export default function DemoPage() {
   const [isParsing, setIsParsing] = useState(false);
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [isCreatingAnother, setIsCreatingAnother] = useState(false);
+  const [isSimulatingPaid, setIsSimulatingPaid] = useState(false);
   const [editingField, setEditingField] = useState<EditingField>(null);
   const [parseFeedbackIndex, setParseFeedbackIndex] = useState(0);
   const [clientRequestId, setClientRequestId] = useState(() => crypto.randomUUID());
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const detailsRef = useRef<HTMLElement | null>(null);
   const lastCheckoutUrlRef = useRef("");
+
+  function syncInputValue(value: string) {
+    setInput(value);
+  }
+
+  function syncTextareaDomValue() {
+    const domValue = textareaRef.current?.value;
+    if (typeof domValue === "string" && domValue !== input) {
+      setInput(domValue);
+    }
+  }
+
+  useLayoutEffect(() => {
+    syncTextareaDomValue();
+  }, []);
 
   useEffect(() => {
     if (!parsed) {
@@ -123,10 +146,10 @@ export default function DemoPage() {
         body: JSON.stringify({ text: input }),
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, randomDelay(420, 920)));
       setParseFeedbackIndex(1);
       
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, randomDelay(640, 1280)));
       setParseFeedbackIndex(2);
 
       const response = await responsePromise;
@@ -139,7 +162,7 @@ export default function DemoPage() {
       }
 
       setParseFeedbackIndex(3);
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, randomDelay(260, 620)));
 
       setParsed({
         productName: data.productName,
@@ -301,6 +324,37 @@ export default function DemoPage() {
     window.location.href = checkoutResult.checkoutUrl;
   }
 
+  async function simulatePaidCheckout() {
+    if (!checkoutResult || isSimulatingPaid) {
+      return;
+    }
+
+    setError("");
+    setCopyError("");
+    setIsSimulatingPaid(true);
+
+    try {
+      const response = await fetch(`/api/orders/${checkoutResult.orderId}/simulate-paid`, {
+        method: "POST",
+        headers: trackingHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        setError(displayReason(data.reason, t.demo.simulatePaidError));
+        return;
+      }
+
+      trackClientEvent("reviewer_payment_simulated", {
+        orderId: checkoutResult.orderId,
+      });
+      window.location.href = `/success?orderId=${encodeURIComponent(checkoutResult.orderId)}`;
+    } catch {
+      setError(t.demo.simulatePaidError);
+    } finally {
+      setIsSimulatingPaid(false);
+    }
+  }
+
   return (
     <div className="app-shell">
       <AppHeader active="demo" />
@@ -322,12 +376,15 @@ export default function DemoPage() {
           </div>
           <div className="payment-input-wrap">
             <textarea
+              ref={textareaRef}
               id="request"
               className={`payment-textarea${error ? " payment-textarea-error" : ""}`}
               value={input}
               onChange={(event) => {
-                setInput(event.target.value);
+                syncInputValue(event.currentTarget.value);
               }}
+              onInput={(event) => syncInputValue(event.currentTarget.value)}
+              onFocus={syncTextareaDomValue}
               maxLength={500}
               placeholder={defaultInput}
             />
@@ -579,6 +636,22 @@ export default function DemoPage() {
                 <ExternalLink size={15} aria-hidden="true" />
                 {t.demo.openCheckout}
               </button>
+              {reviewerToolsEnabled ? (
+                <button
+                  className="secondary-button reviewer-tool-button"
+                  type="button"
+                  onClick={simulatePaidCheckout}
+                  disabled={isSimulatingPaid}
+                  aria-busy={isSimulatingPaid}
+                >
+                  {isSimulatingPaid ? (
+                    <span className="button-spinner" aria-hidden="true" />
+                  ) : (
+                    <Check size={15} aria-hidden="true" />
+                  )}
+                  {isSimulatingPaid ? t.demo.simulatingPaid : t.demo.simulatePaid}
+                </button>
+              ) : null}
             </div>
           </motion.section>
         ) : null}

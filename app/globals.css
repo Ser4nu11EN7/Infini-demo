@@ -86,57 +86,6 @@ button:disabled {
   flex-direction: column;
 }
 
-.route-loading {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-height: 100vh;
-  justify-content: center;
-}
-
-.route-loading-mark {
-  animation: pulseDot 1.2s ease-in-out infinite;
-  background: var(--emerald);
-  border-radius: 50%;
-  height: 18px;
-  width: 18px;
-}
-
-.route-loading-line {
-  animation: routeLine 900ms cubic-bezier(0.22, 1, 0.36, 1) infinite;
-  background: var(--gray-200);
-  border-radius: 999px;
-  height: 2px;
-  overflow: hidden;
-  position: relative;
-  width: 140px;
-}
-
-.route-loading-line::after {
-  background: var(--emerald);
-  border-radius: inherit;
-  content: "";
-  height: 100%;
-  left: 0;
-  position: absolute;
-  top: 0;
-  transform-origin: left;
-  width: 42%;
-}
-
-@keyframes routeLine {
-  from {
-    opacity: 0.55;
-    transform: scaleX(0.82);
-  }
-
-  to {
-    opacity: 1;
-    transform: scaleX(1);
-  }
-}
-
 .variant-nav {
   align-items: center;
   background: var(--white);
@@ -403,14 +352,14 @@ button:disabled {
 }
 
 .infini-nav-trigger svg,
-.infini-language-button svg:last-child {
+.infini-language-caret {
   transition: transform 180ms ease;
 }
 
 .infini-nav-menu:hover .infini-nav-trigger svg,
 .infini-nav-menu:focus-within .infini-nav-trigger svg,
-.infini-language-menu:hover .infini-language-button svg:last-child,
-.infini-language-menu:focus-within .infini-language-button svg:last-child {
+.infini-language-menu:hover .infini-language-caret,
+.infini-language-menu:focus-within .infini-language-caret {
   transform: rotate(180deg);
 }
 
@@ -432,23 +381,31 @@ button:disabled {
 
 .infini-nav-menu:hover .infini-mega-panel,
 .infini-nav-menu:focus-within .infini-mega-panel {
-  max-height: 220px;
+  max-height: 148px;
   opacity: 1;
   pointer-events: auto;
   visibility: visible;
 }
 
+.infini-nav-menu:hover .infini-mega-panel-compact,
+.infini-nav-menu:focus-within .infini-mega-panel-compact {
+  max-height: 104px;
+}
+
 .infini-mega-grid {
+  align-content: center;
   display: grid;
-  gap: 4px 16px;
+  gap: 10px 48px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-height: 148px;
   margin: 0 auto;
   max-width: 1200px;
-  padding: 16px 8px 32px;
+  padding: 0 8px;
 }
 
 .infini-mega-grid-compact {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-height: 104px;
   max-width: 1200px;
 }
 
@@ -501,11 +458,27 @@ button:disabled {
   border-radius: 8px;
   color: var(--black);
   display: inline-flex;
-  gap: 6px;
-  height: 40px;
+  gap: 12px;
+  height: 48px;
   justify-content: center;
-  padding: 0 14px;
+  min-width: 70px;
+  padding: 0 16px;
   transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.infini-language-button svg {
+  color: var(--black);
+  height: 21px;
+  width: 21px;
+}
+
+.infini-language-caret {
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--black);
+  display: inline-block;
+  height: 0;
+  width: 0;
 }
 
 .infini-language-button:hover {
@@ -520,7 +493,7 @@ button:disabled {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   display: grid;
   gap: 4px;
-  min-width: 188px;
+  min-width: 248px;
   opacity: 0;
   padding: 8px;
   pointer-events: none;
@@ -546,11 +519,11 @@ button:disabled {
   border: 0;
   border-radius: 8px;
   color: var(--black);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 500;
   letter-spacing: 0;
   line-height: 1.2;
-  padding: 10px 12px;
+  padding: 14px 16px;
   text-align: left;
 }
 
@@ -697,8 +670,11 @@ button:disabled {
 
 .input-wrapper {
   border-bottom: 3px solid var(--black);
+  align-items: center;
+  display: flex;
+  height: 72px;
   margin-top: 116px;
-  padding: 10px 0 12px;
+  padding: 0 0 12px;
   position: relative;
   transition: border-color 0.4s ease;
 }
@@ -713,6 +689,7 @@ button:disabled {
   font-family: var(--font-main);
   font-size: 32px;
   font-weight: 700;
+  line-height: 40px;
   min-height: 40px;
   overflow: hidden;
   white-space: nowrap;
@@ -1056,7 +1033,8 @@ button:disabled {
   position: absolute;
   top: 34px;
   text-align: center;
-  width: 140px;
+  white-space: nowrap;
+  width: max-content;
   transition: color 0.3s ease;
 }
 
@@ -1444,8 +1422,9 @@ button:disabled {
   font-weight: 800;
   gap: 6px;
   letter-spacing: 0.08em;
+  margin-right: -4px;
   min-width: 86px;
-  padding: 0;
+  padding: 0 0 0 10px;
   text-align: left;
   text-transform: uppercase;
   transition: color 160ms ease, transform 160ms ease;
@@ -1501,6 +1480,10 @@ button:disabled {
 .checkout-actions > * {
   flex: 1 1 220px;
   min-width: 0;
+}
+
+.reviewer-tool-button {
+  flex-basis: 100%;
 }
 
 .button-spinner {
@@ -2696,8 +2679,6 @@ button:disabled {
   .checkout-url-rolling .checkout-url-old,
   .checkout-url-rolling .checkout-url-current,
   .button-spinner,
-  .route-loading-mark,
-  .route-loading-line,
   .parse-step-active .parse-step-dot,
   .spinner {
     animation-duration: 0.01ms !important;

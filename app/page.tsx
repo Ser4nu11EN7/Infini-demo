@@ -231,7 +231,7 @@ export default function HomePage() {
               {t.nav.resources}
               <ChevronDown aria-hidden="true" size={14} strokeWidth={2.5} />
             </button>
-            <div className="infini-mega-panel" role="menu">
+            <div className="infini-mega-panel infini-mega-panel-compact" role="menu">
               <div className="infini-mega-grid infini-mega-grid-compact">
                 {RESOURCE_LINKS.map((item) => {
                   const Icon = item.icon;
@@ -276,7 +276,7 @@ export default function HomePage() {
           <div className="infini-language-menu">
             <button className="infini-language-button" type="button" aria-label="Change language">
               <Globe2 aria-hidden="true" size={18} strokeWidth={2.3} />
-              <ChevronDown aria-hidden="true" size={14} strokeWidth={2.5} />
+              <span className="infini-language-caret" aria-hidden="true" />
             </button>
             <div className="infini-language-dropdown" role="menu">
               <button
@@ -293,7 +293,7 @@ export default function HomePage() {
                 onClick={() => setLocale("zh")}
                 role="menuitem"
               >
-                中文
+                简体中文（马来西亚）
               </button>
             </div>
           </div>

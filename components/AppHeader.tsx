@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Globe2, Plus } from "lucide-react";
+import { Globe2, Plus } from "lucide-react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 
@@ -48,7 +48,7 @@ export function AppHeader({ active, showCreate = false }: AppHeaderProps) {
         <div className="infini-language-menu app-language-menu">
           <button className="infini-language-button" type="button" aria-label="Change language">
             <Globe2 aria-hidden="true" size={18} strokeWidth={2.3} />
-            <ChevronDown aria-hidden="true" size={14} strokeWidth={2.5} />
+            <span className="infini-language-caret" aria-hidden="true" />
           </button>
           <div className="infini-language-dropdown" role="menu">
             <button
@@ -65,7 +65,7 @@ export function AppHeader({ active, showCreate = false }: AppHeaderProps) {
               onClick={() => setLocale("zh")}
               role="menuitem"
             >
-              中文
+              简体中文（马来西亚）
             </button>
           </div>
         </div>

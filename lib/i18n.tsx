@@ -116,6 +116,8 @@ export const messages = {
       copied: "Copied",
       createAnotherLink: "New buyer link",
       openCheckout: "Open checkout",
+      simulatePaid: "Simulate paid",
+      simulatingPaid: "Simulating...",
       review: "Review",
       product: "Product",
       amount: "Amount",
@@ -124,6 +126,7 @@ export const messages = {
       parseError: "Please describe what you are selling and the USD price.",
       productError: "Could not create the product.",
       orderError: "Could not create the checkout.",
+      simulatePaidError: "Could not simulate the paid webhook.",
       copyError: "Could not copy the checkout link.",
       errors: {
         PRICE_NOT_POSITIVE: "Price must be greater than zero.",
@@ -312,6 +315,8 @@ export const messages = {
       copied: "已复制",
       createAnotherLink: "新买家链接",
       openCheckout: "打开 checkout",
+      simulatePaid: "模拟完成支付",
+      simulatingPaid: "模拟中...",
       review: "确认信息",
       product: "商品",
       amount: "金额",
@@ -320,6 +325,7 @@ export const messages = {
       parseError: "请说明你要卖什么，以及对应的美元价格。",
       productError: "商品创建失败。",
       orderError: "收银台创建失败。",
+      simulatePaidError: "模拟支付完成失败。",
       copyError: "复制 checkout 链接失败。",
       errors: {
         PRICE_NOT_POSITIVE: "金额必须大于 0。",
@@ -426,20 +432,25 @@ export function I18nProvider({
   children: ReactNode;
   initialLocale?: Locale;
 }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window === "undefined") {
-      return initialLocale;
-    }
-
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored === "en" || stored === "zh" ? stored : initialLocale;
-  });
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
+    setHasHydrated(true);
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if ((stored === "en" || stored === "zh") && stored !== initialLocale) {
+      setLocaleState(stored);
+    }
+  }, [initialLocale]);
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
     document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
     window.localStorage.setItem(STORAGE_KEY, locale);
     document.cookie = `${STORAGE_KEY}=${locale}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
-  }, [locale]);
+  }, [hasHydrated, locale]);
 
   const value = useMemo<I18nContextValue>(
     () => ({

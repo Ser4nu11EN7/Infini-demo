@@ -6,6 +6,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Infini AI Payment Links",
   description: "Create a crypto checkout link from a natural-language product request.",
+  icons: {
+    icon: "/infini-logo.jpg",
+    shortcut: "/infini-logo.jpg",
+    apple: "/infini-logo.jpg",
+  },
 };
 
 export default async function RootLayout({

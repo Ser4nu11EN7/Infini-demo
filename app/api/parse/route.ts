@@ -11,7 +11,7 @@ type ParseResult = Awaited<ReturnType<typeof parsePaymentRequest>>;
 
 const PARSE_CACHE_TTL_MS = 5 * 60 * 1000;
 const PARSE_CACHE_MAX_ENTRIES = 100;
-const PARSE_CACHE_VERSION = "prompt-currency-cny-usd-v5";
+const PARSE_CACHE_VERSION = "prompt-currency-u-usd-v6";
 const parseCache = new Map<string, { result: ParseResult; expiresAt: number }>();
 
 function cacheKeyForInput(input: string) {
