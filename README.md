@@ -118,6 +118,7 @@ http://localhost:3000
 | `ANTHROPIC_API_KEY` | Yes | API key for Claude extraction. |
 | `ANTHROPIC_MODEL` | No | Model name. Defaults to `claude-haiku-4-5`. |
 | `ANTHROPIC_BASE_URL` | No | Optional Anthropic-compatible endpoint override. |
+| `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` | No | When `true`, shows a button that marks an order paid without a real on-chain transfer. See Reviewer Payment Path. Defaults to `false`. |
 
 ## Vercel Deployment
 
@@ -150,9 +151,10 @@ The repository is ready for Vercel.
    INFINI_WEBHOOK_SECRET=...
    ANTHROPIC_API_KEY=...
    ANTHROPIC_MODEL=claude-haiku-4-5
+   NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true
    ```
 
-   `ANTHROPIC_BASE_URL` is only needed when using an Anthropic-compatible proxy.
+   `ANTHROPIC_BASE_URL` is only needed when using an Anthropic-compatible proxy. Set `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true` so reviewers can reach the simulated payment path without a Web3 wallet.
 
    `APP_BASE_URL` must be the deployed URL, not `localhost`, and should not end with `/`.
 
@@ -184,6 +186,12 @@ demo page
 ```
 
 The local order id is passed to Infini as `client_reference` and is included in the app's `success_url`. The success page never trusts the redirect alone; it calls the backend status route before showing the paid state.
+
+## Reviewer Payment Path
+
+Completing the Infini sandbox checkout requires a real Tron Testnet USDT transfer, which needs a Web3 wallet and testnet funds. To verify the post-payment screens without that, set `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true`. A "simulate payment" button then appears on the checkout-ready card and calls `POST /api/orders/[id]/simulate-paid`, which marks the existing order `paid` (with `rawStatus` `simulated_paid`) and redirects to the success page.
+
+The route only responds when the flag is `true`, never calls Infini, and never changes the amount, product, or creates a new order. It exists only on builds where the flag is set; production builds leave it off. Because the variable is `NEXT_PUBLIC_`, it is read at build time — change it and redeploy for it to take effect.
 
 ## Currency Handling
 

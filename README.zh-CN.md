@@ -118,6 +118,7 @@ http://localhost:3000
 | `ANTHROPIC_API_KEY` | 是 | Claude 抽取使用的 API key。 |
 | `ANTHROPIC_MODEL` | 否 | 模型名，默认 `claude-haiku-4-5`。 |
 | `ANTHROPIC_BASE_URL` | 否 | 可选的 Anthropic 兼容代理地址。 |
+| `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` | 否 | 为 `true` 时显示一个按钮，可在没有真实链上转账的情况下把订单标为已支付，详见「评审支付通道」。默认 `false`。 |
 
 ## Vercel 部署
 
@@ -150,9 +151,10 @@ http://localhost:3000
    INFINI_WEBHOOK_SECRET=...
    ANTHROPIC_API_KEY=...
    ANTHROPIC_MODEL=claude-haiku-4-5
+   NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true
    ```
 
-   `ANTHROPIC_BASE_URL` 仅在使用 Anthropic 兼容代理时才需要填写。
+   `ANTHROPIC_BASE_URL` 仅在使用 Anthropic 兼容代理时才需要填写。将 `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` 设为 `true`，评审者无需 Web3 钱包即可走通模拟支付通道。
 
    `APP_BASE_URL` 必须是线上部署域名，不能是 `localhost`，末尾不要带 `/`。
 
@@ -184,6 +186,12 @@ http://localhost:3000
 ```
 
 本地订单 id 会作为 `client_reference` 传给 Infini，并出现在应用的 `success_url` 中。成功页不会只因为浏览器回跳就显示已支付，而是会调用后端状态接口确认。
+
+## 评审支付通道
+
+完成 Infini 沙盒 checkout 需要在 Tron Testnet 上真实转账 USDT，这要求 Web3 钱包和测试网资产。如果只想验证支付完成后的页面，把 `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` 设为 `true`：checkout 链接卡片上会出现一个「模拟完成支付」按钮，调用 `POST /api/orders/[id]/simulate-paid`，把当前订单标为 `paid`（`rawStatus` 记为 `simulated_paid`），然后跳转成功页。
+
+该路由仅在标志为 `true` 时响应，不调用 Infini，也不修改金额、商品或创建新订单，只更新本地订单状态。它只存在于开启该标志的构建中，生产构建默认关闭。由于变量以 `NEXT_PUBLIC_` 开头，它在构建时读取——修改后需要重新部署才会生效。
 
 ## 币种处理
 
