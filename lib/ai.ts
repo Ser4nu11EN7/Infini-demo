@@ -1,6 +1,8 @@
 import {
   naturalLanguageSchema,
+  normalizePrice,
   validateAiExtraction,
+  validateCurrency,
   validateRawRequestForPayment,
 } from "@/lib/validate";
 
@@ -116,6 +118,42 @@ function extractJson(text: string) {
   return JSON.parse(brace ? brace[0] : trimmed);
 }
 
+// Last-resort extraction when the AI call fails or returns non-JSON.
+// Deliberately narrow: only recovers an explicit USD-marked numeric price
+// (e.g. "$10", "10 USD", "10 dollars", "10美元", "10刀"). It never infers a
+// currency, never reads bare numbers, and never guesses a product name —
+// those would risk the currency safety rules. The result still passes the
+// same normalizePrice/validateCurrency checks as the AI path.
+function regexFallback(
+  input: string
+): { ok: true; productName: string; price: string; currency: string } | null {
+  const usdPatterns = [
+    /\$\s*(\d+(?:\.\d+)?)/,
+    /(\d+(?:\.\d+)?)\s*(?:usd|dollars?|bucks)\b/i,
+    /(\d+(?:\.\d+)?)\s*(?:美元|美金|刀乐|刀)/,
+  ];
+
+  for (const pattern of usdPatterns) {
+    const match = input.match(pattern);
+    if (!match) {
+      continue;
+    }
+    try {
+      const price = normalizePrice(match[1]);
+      const currency = validateCurrency("USD");
+      return { ok: true, productName: "Product", price, currency };
+    } catch {
+      // Price failed validation (negative, too large, too precise) — do not
+      // fall back; let the caller return the friendly error.
+      return null;
+    }
+  }
+  return null;
+}
+
+const FALLBACK_HINT =
+  "Could not read that as a product and price. Try a clear sentence like 'sell an AI report for $10'.";
+
 export async function parsePaymentRequest(
   input: string
 ): Promise<ParsePaymentRequestResult> {
@@ -169,18 +207,36 @@ export async function parsePaymentRequest(
     `Request: ${cleanInput}`,
   ].join("\n");
 
-  const text = await callModel(system, user);
+  let text: string;
+  try {
+    text = await callModel(system, user);
+  } catch (error) {
+    // AI provider is down / timed out / rate-limited. Try a narrow regex
+    // recovery before giving up, so an explicit price like "$10" still works.
+    const recovered = regexFallback(cleanInput);
+    if (recovered) {
+      return recovered;
+    }
+    return {
+      ok: false,
+      reason: error instanceof Error ? error.message : "AI provider error.",
+      reasonCode: "AI_PROVIDER_ERROR",
+    };
+  }
 
   let parsed: { ok?: boolean; reason?: string; [key: string]: unknown };
   try {
     parsed = extractJson(text);
   } catch {
-    // Model returned non-JSON (e.g. a refusal or prose). Give a friendly hint
-    // instead of leaking a raw JSON parse error to the user.
+    // Model returned non-JSON (e.g. a refusal or prose). Try regex recovery
+    // first, then fall back to a friendly hint.
+    const recovered = regexFallback(cleanInput);
+    if (recovered) {
+      return recovered;
+    }
     return {
       ok: false,
-      reason:
-        "Could not read that as a product and price. Try a clear sentence like 'sell an AI report for $10'.",
+      reason: FALLBACK_HINT,
       reasonCode: "AI_EXTRACTION_FAILED",
     };
   }
