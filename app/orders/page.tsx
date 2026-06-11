@@ -69,24 +69,36 @@ export default function OrdersPage() {
       setLoading(true);
       setLoadError("");
     }
-    fetch("/api/orders", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error("Failed to load orders");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const nextOrders = data.orders || [];
-        setOrders(nextOrders);
-        writeOrdersCache(nextOrders);
-      })
-      .catch(() => {
-        if (showLoading) {
-          setLoadError(t.orders.loadError);
-        }
-      })
-      .finally(() => setLoading(false));
+
+    // Neon serverless can reset idle connections, so the first hit after an
+    // idle period may fail with a connection error. Retry once before
+    // surfacing an error to the user.
+    async function fetchOnce() {
+      const response = await fetch("/api/orders", { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error("Failed to load orders");
+      }
+      return response.json();
+    }
+
+    try {
+      let data;
+      try {
+        data = await fetchOnce();
+      } catch {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        data = await fetchOnce();
+      }
+      const nextOrders = data.orders || [];
+      setOrders(nextOrders);
+      writeOrdersCache(nextOrders);
+    } catch {
+      if (showLoading) {
+        setLoadError(t.orders.loadError);
+      }
+    } finally {
+      setLoading(false);
+    }
   }, [t.orders.loadError]);
 
   useEffect(() => {
