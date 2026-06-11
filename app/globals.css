@@ -470,7 +470,7 @@ button:disabled {
   color: var(--black);
   display: inline-flex;
   gap: 12px;
-  height: 48px;
+  height: 40px;
   justify-content: center;
   min-width: 70px;
   padding: 0 16px;
@@ -2426,7 +2426,7 @@ button:disabled {
   }
 
   .infini-language-button {
-    height: 38px;
+    height: 42px;
     padding: 0 10px;
   }
 
@@ -2650,7 +2650,7 @@ button:disabled {
   }
 
   .infini-language-button {
-    height: 36px;
+    height: 42px;
     padding: 0 9px;
   }
 
