@@ -45,3 +45,6 @@ test-variants.js
 *给Codex完整方案.md
 *UI样式骨架.md
 *项目方案.md
+
+# Provider comparison script (local only)
+eval/run-deepseek.mjs

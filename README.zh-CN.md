@@ -115,10 +115,11 @@ http://localhost:3000
 | `INFINI_KEY_ID` | 是 | Infini API key id。 |
 | `INFINI_SECRET_KEY` | 是 | Infini 请求签名密钥。 |
 | `INFINI_WEBHOOK_SECRET` | 是 | webhook 验签密钥。 |
-| `ANTHROPIC_API_KEY` | 是 | Claude 抽取使用的 API key。 |
-| `ANTHROPIC_MODEL` | 否 | 模型名，默认 `claude-haiku-4-5`。 |
-| `ANTHROPIC_BASE_URL` | 否 | 可选的 Anthropic 兼容代理地址。 |
-| `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` | 否 | 为 `true` 时显示一个按钮，可在没有真实链上转账的情况下把订单标为已支付，详见「评审支付通道」。默认 `false`。 |
+| `AI_API_KEY` | 是 | OpenAI 兼容端点的 API key，用于抽取。 |
+| `AI_BASE_URL` | 是 | OpenAI 兼容的 chat completions 接口地址（需提供 `/chat/completions`）。 |
+| `AI_MODEL` | 否 | 模型名，默认 `claude-haiku-4-5`。 |
+| `ENABLE_REVIEWER_TOOLS` | 否 | 服务端开关，控制 simulate-paid 路由。设为 `true` 启用。默认 `false`。 |
+| `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` | 否 | 前端开关，控制 simulate-paid 按钮显示。需与 `ENABLE_REVIEWER_TOOLS` 一起设置。默认 `false`。 |
 
 ## Vercel 部署
 
@@ -149,12 +150,14 @@ http://localhost:3000
    INFINI_KEY_ID=...
    INFINI_SECRET_KEY=...
    INFINI_WEBHOOK_SECRET=...
-   ANTHROPIC_API_KEY=...
-   ANTHROPIC_MODEL=claude-haiku-4-5
+   AI_BASE_URL=https://your-openai-compatible-endpoint/v1
+   AI_API_KEY=...
+   AI_MODEL=claude-haiku-4-5
+   ENABLE_REVIEWER_TOOLS=true
    NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true
    ```
 
-   `ANTHROPIC_BASE_URL` 仅在使用 Anthropic 兼容代理时才需要填写。将 `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` 设为 `true`，评审者无需 Web3 钱包即可走通模拟支付通道。
+   将 `ENABLE_REVIEWER_TOOLS` 和 `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` 都设为 `true`，评审者无需 Web3 钱包即可走通模拟支付通道（前者控制路由，后者控制按钮显示）。
 
    `APP_BASE_URL` 必须是线上部署域名，不能是 `localhost`，末尾不要带 `/`。
 
@@ -189,7 +192,7 @@ http://localhost:3000
 
 ## 评审支付通道
 
-完成 Infini 沙盒 checkout 需要在 Tron Testnet 上真实转账 USDT，这要求 Web3 钱包和测试网资产。如果只想验证支付完成后的页面，把 `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` 设为 `true`：checkout 链接卡片上会出现一个「模拟完成支付」按钮，调用 `POST /api/orders/[id]/simulate-paid`，把当前订单标为 `paid`（`rawStatus` 记为 `simulated_paid`），然后跳转成功页。
+完成 Infini 沙盒 checkout 需要在 Tron Testnet 上真实转账 USDT，这要求 Web3 钱包和测试网资产。如果只想验证支付完成后的页面，把 `ENABLE_REVIEWER_TOOLS`（控制路由）和 `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS`（控制按钮显示）都设为 `true`：checkout 链接卡片上会出现一个「模拟完成支付」按钮，调用 `POST /api/orders/[id]/simulate-paid`，把当前订单标为 `paid`（`rawStatus` 记为 `simulated_paid`），然后跳转成功页。
 
 该路由仅在标志为 `true` 时响应，不调用 Infini，也不修改金额、商品或创建新订单，只更新本地订单状态。它只存在于开启该标志的构建中，生产构建默认关闭。由于变量以 `NEXT_PUBLIC_` 开头，它在构建时读取——修改后需要重新部署才会生效。
 

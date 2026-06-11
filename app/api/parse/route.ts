@@ -11,11 +11,13 @@ type ParseResult = Awaited<ReturnType<typeof parsePaymentRequest>>;
 
 const PARSE_CACHE_TTL_MS = 5 * 60 * 1000;
 const PARSE_CACHE_MAX_ENTRIES = 100;
-const PARSE_CACHE_VERSION = "prompt-currency-u-usd-v6";
+const PARSE_CACHE_VERSION = "prompt-currency-u-usd-v10";
+const PARSE_CACHE_MODEL = process.env.AI_MODEL || "default";
 const parseCache = new Map<string, { result: ParseResult; expiresAt: number }>();
 
 function cacheKeyForInput(input: string) {
-  return `${PARSE_CACHE_VERSION}:${input.trim().replace(/\s+/g, " ").toLowerCase()}`;
+  const normalized = input.trim().replace(/\s+/g, " ").toLowerCase();
+  return `${PARSE_CACHE_VERSION}:${PARSE_CACHE_MODEL}:${normalized}`;
 }
 
 function getCachedParse(input: string) {

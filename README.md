@@ -115,10 +115,11 @@ http://localhost:3000
 | `INFINI_KEY_ID` | Yes | Infini API key id. |
 | `INFINI_SECRET_KEY` | Yes | Infini request signing secret. |
 | `INFINI_WEBHOOK_SECRET` | Yes | Secret for webhook signature verification. |
-| `ANTHROPIC_API_KEY` | Yes | API key for Claude extraction. |
-| `ANTHROPIC_MODEL` | No | Model name. Defaults to `claude-haiku-4-5`. |
-| `ANTHROPIC_BASE_URL` | No | Optional Anthropic-compatible endpoint override. |
-| `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` | No | When `true`, shows a button that marks an order paid without a real on-chain transfer. See Reviewer Payment Path. Defaults to `false`. |
+| `AI_API_KEY` | Yes | API key for the OpenAI-compatible endpoint used for extraction. |
+| `AI_BASE_URL` | Yes | Base URL of an OpenAI-compatible chat completions API (must expose `/chat/completions`). |
+| `AI_MODEL` | No | Model name. Defaults to `claude-haiku-4-5`. |
+| `ENABLE_REVIEWER_TOOLS` | No | Server-side gate for the simulate-paid route. Set `true` to enable. Defaults to `false`. |
+| `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` | No | Client-side flag that shows the simulate-paid button. Set together with `ENABLE_REVIEWER_TOOLS`. Defaults to `false`. |
 
 ## Vercel Deployment
 
@@ -149,12 +150,14 @@ The repository is ready for Vercel.
    INFINI_KEY_ID=...
    INFINI_SECRET_KEY=...
    INFINI_WEBHOOK_SECRET=...
-   ANTHROPIC_API_KEY=...
-   ANTHROPIC_MODEL=claude-haiku-4-5
+   AI_BASE_URL=https://your-openai-compatible-endpoint/v1
+   AI_API_KEY=...
+   AI_MODEL=claude-haiku-4-5
+   ENABLE_REVIEWER_TOOLS=true
    NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true
    ```
 
-   `ANTHROPIC_BASE_URL` is only needed when using an Anthropic-compatible proxy. Set `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true` so reviewers can reach the simulated payment path without a Web3 wallet.
+   Set both `ENABLE_REVIEWER_TOOLS` and `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` to `true` so reviewers can reach the simulated payment path without a Web3 wallet (the first gates the route, the second shows the button).
 
    `APP_BASE_URL` must be the deployed URL, not `localhost`, and should not end with `/`.
 
@@ -189,7 +192,7 @@ The local order id is passed to Infini as `client_reference` and is included in 
 
 ## Reviewer Payment Path
 
-Completing the Infini sandbox checkout requires a real Tron Testnet USDT transfer, which needs a Web3 wallet and testnet funds. To verify the post-payment screens without that, set `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true`. A "simulate payment" button then appears on the checkout-ready card and calls `POST /api/orders/[id]/simulate-paid`, which marks the existing order `paid` (with `rawStatus` `simulated_paid`) and redirects to the success page.
+Completing the Infini sandbox checkout requires a real Tron Testnet USDT transfer, which needs a Web3 wallet and testnet funds. To verify the post-payment screens without that, set both `ENABLE_REVIEWER_TOOLS=true` (gates the route) and `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true` (shows the button). A "simulate payment" button then appears on the checkout-ready card and calls `POST /api/orders/[id]/simulate-paid`, which marks the existing order `paid` (with `rawStatus` `simulated_paid`) and redirects to the success page.
 
 The route only responds when the flag is `true`, never calls Infini, and never changes the amount, product, or creates a new order. It exists only on builds where the flag is set; production builds leave it off. Because the variable is `NEXT_PUBLIC_`, it is read at build time — change it and redeploy for it to take effect.
 
