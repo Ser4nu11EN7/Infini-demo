@@ -340,6 +340,7 @@ button:disabled {
 }
 
 .infini-home-nav a:hover,
+.infini-nav-menu.is-open .infini-nav-trigger,
 .infini-nav-menu:hover .infini-nav-trigger,
 .infini-nav-menu:focus-within .infini-nav-trigger {
   background: #f2f2f2;
@@ -357,6 +358,7 @@ button:disabled {
 }
 
 .infini-nav-menu:hover .infini-nav-trigger svg,
+.infini-nav-menu.is-open .infini-nav-trigger svg,
 .infini-nav-menu:focus-within .infini-nav-trigger svg,
 .infini-language-menu:hover .infini-language-caret,
 .infini-language-menu:focus-within .infini-language-caret {
@@ -373,21 +375,23 @@ button:disabled {
   pointer-events: none;
   position: fixed;
   top: 80px;
-  transition: max-height 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 180ms ease;
-  visibility: hidden;
+  transition:
+    max-height 230ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 160ms ease;
   width: 100vw;
   z-index: 80;
 }
 
 .infini-nav-menu:hover .infini-mega-panel,
+.infini-nav-menu.is-open .infini-mega-panel,
 .infini-nav-menu:focus-within .infini-mega-panel {
   max-height: 148px;
   opacity: 1;
   pointer-events: auto;
-  visibility: visible;
 }
 
 .infini-nav-menu:hover .infini-mega-panel-compact,
+.infini-nav-menu.is-open .infini-mega-panel-compact,
 .infini-nav-menu:focus-within .infini-mega-panel-compact {
   max-height: 104px;
 }
@@ -404,9 +408,9 @@ button:disabled {
 }
 
 .infini-mega-grid-compact {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   min-height: 104px;
-  max-width: 1200px;
+  max-width: 920px;
 }
 
 .infini-mega-grid a {
@@ -433,6 +437,13 @@ button:disabled {
 .infini-mega-grid svg {
   color: var(--infini-green);
   flex: 0 0 auto;
+}
+
+.infini-mega-icon-image {
+  display: block;
+  flex: 0 0 auto;
+  height: 28px;
+  width: 28px;
 }
 
 .infini-mega-grid small {

@@ -7,7 +7,7 @@ type RouteContext = {
 };
 
 function reviewerToolsEnabled() {
-  return process.env.NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS === "true";
+  return process.env.ENABLE_REVIEWER_TOOLS === "true";
 }
 
 export async function POST(request: Request, context: RouteContext) {

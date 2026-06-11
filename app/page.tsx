@@ -1,94 +1,127 @@
 "use client";
 
 import {
-  BadgeDollarSign,
-  BookOpen,
   ChevronDown,
-  Code2,
-  CreditCard,
   Globe2,
-  Landmark,
-  Newspaper,
-  ReceiptText,
-  Wallet,
-  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ComponentType, FocusEvent, SVGProps } from "react";
 import { useI18n } from "@/lib/i18n";
 import { trackClientEvent } from "@/lib/tracking-client";
 
+type MegaMenu = "products" | "resources";
+
 type MegaLink = {
-  icon: LucideIcon;
+  key:
+    | "helpCenter"
+    | "blog"
+    | "contactUs";
+  href: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+};
+
+type ProductLink = {
   key:
     | "globalAccounts"
     | "corporateCards"
     | "paymentGateway"
     | "payroll"
     | "treasury"
-    | "wallet"
-    | "documentation"
-    | "apiReference"
-    | "blog"
-    | "contactSales";
+    | "wallet";
   href: string;
+  iconSrc: string;
 };
 
-const PRODUCT_LINKS: MegaLink[] = [
+const PRODUCT_LINKS: ProductLink[] = [
   {
-    icon: Globe2,
     key: "globalAccounts",
-    href: "https://www.infini.money/",
+    href: "https://www.infini.money/products/global-accounts",
+    iconSrc: "/v4/navigator-icon/earth.svg",
   },
   {
-    icon: CreditCard,
     key: "corporateCards",
-    href: "https://www.infini.money/",
+    href: "https://www.infini.money/products/corporate-cards",
+    iconSrc: "/v4/navigator-icon/shape.svg",
   },
   {
-    icon: BadgeDollarSign,
     key: "paymentGateway",
-    href: "https://www.infini.money/",
+    href: "https://www.infini.money/products/payments",
+    iconSrc: "/v4/navigator-icon/financial-entries.svg",
   },
   {
-    icon: ReceiptText,
     key: "payroll",
-    href: "https://www.infini.money/",
+    href: "https://www.infini.money/products/payroll",
+    iconSrc: "/v4/navigator-icon/financial-report.svg",
   },
   {
-    icon: Landmark,
     key: "treasury",
-    href: "https://www.infini.money/",
+    href: "https://www.infini.money/products/treasury",
+    iconSrc: "/v4/navigator-icon/trending-top.svg",
   },
   {
-    icon: Wallet,
     key: "wallet",
-    href: "https://www.infini.money/",
+    href: "https://www.infini.money/infini-wallet",
+    iconSrc: "/v4/navigator-icon/financial-entries.svg",
   },
 ];
 
 const RESOURCE_LINKS: MegaLink[] = [
   {
-    icon: BookOpen,
-    key: "documentation",
-    href: "https://developer.infini.money",
+    icon: HelpCenterIcon,
+    key: "helpCenter",
+    href: "https://help.infini.money/en/",
   },
   {
-    icon: Code2,
-    key: "apiReference",
-    href: "https://developer.infini.money",
-  },
-  {
-    icon: Newspaper,
+    icon: BlogIcon,
     key: "blog",
     href: "https://www.infini.money/blog",
   },
   {
-    icon: BadgeDollarSign,
-    key: "contactSales",
-    href: "https://www.infini.money/contact",
+    icon: ContactUsIcon,
+    key: "contactUs",
+    href: "https://calendly.com/zhujingfeng858/30min",
   },
 ];
+
+function BlogIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 25 24" fill="none" {...props}>
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M5.75 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-14Zm3 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm2 12.5h3v-5.5c0-.825.633-1.5 1.5-1.5a1.49 1.49 0 0 1 1.514 1.5V19h2.986v-6c0-2-1.5-3.5-3.5-3.5-1.5 0-2.5 1.084-2.5 1.084V10h-3v9Zm-5 0h3.014v-9H5.75v9Z"
+      />
+    </svg>
+  );
+}
+
+function HelpCenterIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" {...props}>
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10Zm-10.844 1H9.5l.5-2h4l-1.5 4H14l-.552 1.103a1.622 1.622 0 0 1-2.97-1.295L11.156 13ZM12 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"
+      />
+    </svg>
+  );
+}
+
+function ContactUsIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" {...props}>
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M6 3C4.343 3 3 4.338 3 5.995V22l2.121-2.121A3 3 0 0 1 7.241 19h10.763A2.997 2.997 0 0 0 21 16V3H6Zm5 7c0 1.5-.5 3-2 4v-2a2 2 0 1 1 2-2Zm6 0c0 1.5-.5 3-2 4v-2a2 2 0 1 1 2-2Z"
+      />
+    </svg>
+  );
+}
 
 const TYPEWRITER_SENTENCES = {
   en: [
@@ -105,6 +138,43 @@ const TYPEWRITER_SENTENCES = {
 
 export default function HomePage() {
   const { locale, setLocale, t } = useI18n();
+  const [activeMegaMenu, setActiveMegaMenu] = useState<MegaMenu | null>(null);
+  const closeMegaTimer = useRef<number | null>(null);
+
+  function clearMegaCloseTimer() {
+    if (closeMegaTimer.current !== null) {
+      window.clearTimeout(closeMegaTimer.current);
+      closeMegaTimer.current = null;
+    }
+  }
+
+  function openMegaMenu(menu: MegaMenu) {
+    clearMegaCloseTimer();
+    setActiveMegaMenu(menu);
+  }
+
+  function scheduleMegaMenuClose() {
+    clearMegaCloseTimer();
+    closeMegaTimer.current = window.setTimeout(() => {
+      setActiveMegaMenu(null);
+      closeMegaTimer.current = null;
+    }, 120);
+  }
+
+  function handleMegaMenuBlur(event: FocusEvent<HTMLDivElement>) {
+    if (
+      !(event.relatedTarget instanceof Node) ||
+      !event.currentTarget.contains(event.relatedTarget)
+    ) {
+      scheduleMegaMenuClose();
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      clearMegaCloseTimer();
+    };
+  }, []);
 
   useEffect(() => {
     trackClientEvent("landing_viewed");
@@ -194,15 +264,24 @@ export default function HomePage() {
         </Link>
 
         <nav className="infini-home-nav" aria-label="Primary">
-          <div className="infini-nav-menu">
+          <div
+            className={`infini-nav-menu${activeMegaMenu === "products" ? " is-open" : ""}`}
+            onBlur={handleMegaMenuBlur}
+            onFocus={() => openMegaMenu("products")}
+            onMouseEnter={() => openMegaMenu("products")}
+            onMouseLeave={scheduleMegaMenuClose}
+          >
             <button className="infini-nav-trigger" type="button">
               {t.nav.products}
               <ChevronDown aria-hidden="true" size={14} strokeWidth={2.5} />
             </button>
-            <div className="infini-mega-panel" role="menu">
+            <div
+              className="infini-mega-panel"
+              onMouseEnter={() => openMegaMenu("products")}
+              role="menu"
+            >
               <div className="infini-mega-grid">
                 {PRODUCT_LINKS.map((item) => {
-                  const Icon = item.icon;
                   return (
                     <a
                       key={item.key}
@@ -211,7 +290,7 @@ export default function HomePage() {
                       rel="noreferrer"
                       role="menuitem"
                     >
-                      <Icon aria-hidden="true" size={28} strokeWidth={2.4} />
+                      <img className="infini-mega-icon-image" src={item.iconSrc} alt="" />
                       <span>{t.nav.productMenu[item.key as keyof typeof t.nav.productMenu]}</span>
                       <small>
                         {
@@ -226,24 +305,38 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="infini-nav-menu">
+          <div
+            className={`infini-nav-menu${activeMegaMenu === "resources" ? " is-open" : ""}`}
+            onBlur={handleMegaMenuBlur}
+            onFocus={() => openMegaMenu("resources")}
+            onMouseEnter={() => openMegaMenu("resources")}
+            onMouseLeave={scheduleMegaMenuClose}
+          >
             <button className="infini-nav-trigger" type="button">
               {t.nav.resources}
               <ChevronDown aria-hidden="true" size={14} strokeWidth={2.5} />
             </button>
-            <div className="infini-mega-panel infini-mega-panel-compact" role="menu">
+            <div
+              className="infini-mega-panel infini-mega-panel-compact"
+              onMouseEnter={() => openMegaMenu("resources")}
+              role="menu"
+            >
               <div className="infini-mega-grid infini-mega-grid-compact">
                 {RESOURCE_LINKS.map((item) => {
                   const Icon = item.icon;
+                  const href =
+                    item.key === "helpCenter" && locale === "zh"
+                      ? "https://help.infini.money/zh-CN/"
+                      : item.href;
                   return (
                     <a
                       key={item.key}
-                      href={item.href}
+                      href={href}
                       target="_blank"
                       rel="noreferrer"
                       role="menuitem"
                     >
-                      <Icon aria-hidden="true" size={28} strokeWidth={2.4} />
+                      <Icon aria-hidden="true" width={28} height={28} />
                       <span>{t.nav.resourceMenu[item.key as keyof typeof t.nav.resourceMenu]}</span>
                       <small>
                         {
