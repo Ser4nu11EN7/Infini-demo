@@ -212,7 +212,7 @@ Rejected CNY/RMB wording:
 块, 块钱, 元, 人民币, ￥, ¥
 ```
 
-Bare numbers without a currency are rejected. Prices must be positive, carry at most six decimal places, and stay at or below `100000`.
+Bare numbers without a currency are rejected. Prices must be between `0.1` and `100000` USD (Infini's checkout minimum is `0.1`) and carry at most six decimal places.
 
 Claude handles natural-language extraction, but `lib/validate.ts` re-validates and normalizes the model output. The model is not trusted as the source of truth for payment amount or currency.
 
