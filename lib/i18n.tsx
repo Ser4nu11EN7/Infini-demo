@@ -145,7 +145,7 @@ export const messages = {
     success: {
       paidEyebrow: "Payment confirmed",
       checkingEyebrow: "Checking payment",
-      paidTitle: "Payment confirmed",
+      paidTitle: "Payment Successful",
       checkingTitle: "Checking payment status",
       paidBody: "Infini confirmed this payment.",
       checkingBody: "Checking payment status.",
@@ -342,7 +342,7 @@ export const messages = {
     success: {
       paidEyebrow: "支付已确认",
       checkingEyebrow: "正在确认支付",
-      paidTitle: "支付已确认",
+      paidTitle: "支付成功",
       checkingTitle: "正在确认支付状态",
       paidBody: "Infini 已确认这笔支付。",
       checkingBody: "正在确认支付状态。",
