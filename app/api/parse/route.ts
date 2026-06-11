@@ -11,7 +11,7 @@ type ParseResult = Awaited<ReturnType<typeof parsePaymentRequest>>;
 
 const PARSE_CACHE_TTL_MS = 5 * 60 * 1000;
 const PARSE_CACHE_MAX_ENTRIES = 100;
-const PARSE_CACHE_VERSION = "prompt-currency-u-usd-v11";
+const PARSE_CACHE_VERSION = "prompt-currency-u-usd-v13-sonnet";
 const PARSE_CACHE_MODEL = process.env.AI_MODEL || "default";
 const parseCache = new Map<string, { result: ParseResult; expiresAt: number }>();
 

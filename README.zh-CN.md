@@ -117,7 +117,7 @@ http://localhost:3000
 | `INFINI_WEBHOOK_SECRET` | 是 | webhook 验签密钥。 |
 | `AI_API_KEY` | 是 | OpenAI 兼容端点的 API key，用于抽取。 |
 | `AI_BASE_URL` | 是 | OpenAI 兼容的 chat completions 接口地址（需提供 `/chat/completions`）。 |
-| `AI_MODEL` | 否 | 模型名，默认 `claude-haiku-4-5`。 |
+| `AI_MODEL` | 否 | 模型名，默认 `claude-sonnet-4-6`。 |
 | `ENABLE_REVIEWER_TOOLS` | 否 | 服务端开关，控制 simulate-paid 路由。设为 `true` 启用。默认 `false`。 |
 | `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` | 否 | 前端开关，控制 simulate-paid 按钮显示。需与 `ENABLE_REVIEWER_TOOLS` 一起设置。默认 `false`。 |
 
@@ -152,7 +152,7 @@ http://localhost:3000
    INFINI_WEBHOOK_SECRET=...
    AI_BASE_URL=https://your-openai-compatible-endpoint/v1
    AI_API_KEY=...
-   AI_MODEL=claude-haiku-4-5
+   AI_MODEL=claude-sonnet-4-6
    ENABLE_REVIEWER_TOOLS=true
    NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true
    ```

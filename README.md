@@ -117,7 +117,7 @@ http://localhost:3000
 | `INFINI_WEBHOOK_SECRET` | Yes | Secret for webhook signature verification. |
 | `AI_API_KEY` | Yes | API key for the OpenAI-compatible endpoint used for extraction. |
 | `AI_BASE_URL` | Yes | Base URL of an OpenAI-compatible chat completions API (must expose `/chat/completions`). |
-| `AI_MODEL` | No | Model name. Defaults to `claude-haiku-4-5`. |
+| `AI_MODEL` | No | Model name. Defaults to `claude-sonnet-4-6`. |
 | `ENABLE_REVIEWER_TOOLS` | No | Server-side gate for the simulate-paid route. Set `true` to enable. Defaults to `false`. |
 | `NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS` | No | Client-side flag that shows the simulate-paid button. Set together with `ENABLE_REVIEWER_TOOLS`. Defaults to `false`. |
 
@@ -152,7 +152,7 @@ The repository is ready for Vercel.
    INFINI_WEBHOOK_SECRET=...
    AI_BASE_URL=https://your-openai-compatible-endpoint/v1
    AI_API_KEY=...
-   AI_MODEL=claude-haiku-4-5
+   AI_MODEL=claude-sonnet-4-6
    ENABLE_REVIEWER_TOOLS=true
    NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS=true
    ```
