@@ -500,13 +500,13 @@ button:disabled {
 
 .infini-language-dropdown {
   background: var(--white);
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   display: grid;
-  gap: 4px;
-  min-width: 248px;
+  gap: 3px;
+  min-width: 174px;
   opacity: 0;
-  padding: 8px;
+  padding: 6px;
   pointer-events: none;
   position: absolute;
   right: 0;
@@ -528,13 +528,13 @@ button:disabled {
 .infini-language-dropdown button {
   background: transparent;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--black);
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0;
   line-height: 1.2;
-  padding: 14px 16px;
+  padding: 10px 11px;
   text-align: left;
 }
 
