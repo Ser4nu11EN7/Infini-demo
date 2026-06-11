@@ -128,6 +128,7 @@ export const messages = {
       copyError: "Could not copy the checkout link.",
       errors: {
         PRICE_NOT_POSITIVE: "Price must be greater than zero.",
+        PRICE_TOO_LOW: "Price must be at least 0.1 USD.",
         PRICE_TOO_HIGH: "Price must be 100000 USD or less.",
         PRICE_TOO_PRECISE: "Price can have at most 6 decimal places.",
         INPUT_TOO_LONG: "Keep the request under 500 characters.",
@@ -325,6 +326,7 @@ export const messages = {
       copyError: "复制 checkout 链接失败。",
       errors: {
         PRICE_NOT_POSITIVE: "金额必须大于 0。",
+        PRICE_TOO_LOW: "金额至少为 0.1 美元。",
         PRICE_TOO_HIGH: "金额不能超过 100000 美元。",
         PRICE_TOO_PRECISE: "金额最多支持 6 位小数。",
         INPUT_TOO_LONG: "请求内容不能超过 500 个字符。",

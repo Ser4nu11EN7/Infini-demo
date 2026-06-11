@@ -21,6 +21,7 @@ type ParsePaymentRequestResult =
 
 function reasonCodeForMessage(message: string) {
   if (message.includes("greater than zero")) return "PRICE_NOT_POSITIVE";
+  if (message.includes("at least 0.1")) return "PRICE_TOO_LOW";
   if (message.includes("100000")) return "PRICE_TOO_HIGH";
   if (message.includes("6 decimal")) return "PRICE_TOO_PRECISE";
   if (message.includes("500 characters")) return "INPUT_TOO_LONG";
@@ -58,6 +59,12 @@ function reasonCodeForAiFailure(reason: string) {
   if (missingProduct) return "MISSING_PRODUCT";
   if (missingPrice) return "MISSING_PRICE";
   return "AI_EXTRACTION_FAILED";
+}
+
+function hasExplicitUsdPrice(input: string) {
+  return /(?:\$|USD\s*)\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*(?:dollars?|bucks?|USD\b|u\b|美元|美金|刀|刀乐)/i.test(
+    input
+  );
 }
 
 function getAiConfig() {
@@ -121,9 +128,8 @@ function extractJson(text: string) {
 // Last-resort extraction when the AI call fails or returns non-JSON.
 // Deliberately narrow: only recovers an explicit USD-marked numeric price
 // (e.g. "$10", "10 USD", "10 dollars", "10美元", "10刀"). It never infers a
-// currency, never reads bare numbers, and never guesses a product name —
-// those would risk the currency safety rules. The result still passes the
-// same normalizePrice/validateCurrency checks as the AI path.
+// currency or reads bare numbers. The result still passes the same
+// normalizePrice/validateCurrency checks as the AI path.
 function regexFallback(
   input: string
 ): { ok: true; productName: string; price: string; currency: string } | null {
@@ -133,6 +139,25 @@ function regexFallback(
     /(\d+(?:\.\d+)?)\s*(?:美元|美金|刀乐|刀)/,
   ];
 
+  function fallbackProductName(match: RegExpMatchArray) {
+    const matchIndex = match.index ?? -1;
+    const matchedText = match[0] || "";
+    const before = matchIndex >= 0 ? input.slice(0, matchIndex) : "";
+    const after =
+      matchIndex >= 0 ? input.slice(matchIndex + matchedText.length) : "";
+    const candidates = [before, after]
+      .map((value) =>
+        value
+          .replace(/["'“”‘’]/g, "")
+          .replace(/\b(?:sell|selling|charge|for|access|to|my|a|an|the|product|is|price|amount|buyer|pays|create|checkout)\b/gi, " ")
+          .replace(/(?:卖|售卖|收|收费|价格|金额|商品|是|一个|一份|我的|给用户|下载|获得)/g, " ")
+          .replace(/[，,。:：;；\-—]+/g, " ")
+          .trim()
+      )
+      .filter(Boolean);
+    return candidates[0] || "Product";
+  }
+
   for (const pattern of usdPatterns) {
     const match = input.match(pattern);
     if (!match) {
@@ -141,7 +166,7 @@ function regexFallback(
     try {
       const price = normalizePrice(match[1]);
       const currency = validateCurrency("USD");
-      return { ok: true, productName: "Product", price, currency };
+      return { ok: true, productName: fallbackProductName(match), price, currency };
     } catch {
       // Price failed validation (negative, too large, too precise) — do not
       // fall back; let the caller return the friendly error.
@@ -153,6 +178,10 @@ function regexFallback(
 
 const FALLBACK_HINT =
   "Could not read that as a product and price. Try a clear sentence like 'sell an AI report for $10'.";
+
+function isGenericProductName(productName: string) {
+  return /^(?:something|anything|product|item|thing|it)$/i.test(productName.trim());
+}
 
 export async function parsePaymentRequest(
   input: string
@@ -235,14 +264,27 @@ export async function parsePaymentRequest(
 
   try {
     if (!parsed.ok) {
+      const reason = parsed.reason || "Missing price.";
+      const reasonCode = reasonCodeForAiFailure(reason);
       return {
         ok: false,
         reason: parsed.reason || "Missing price. Please add a price.",
-        reasonCode: reasonCodeForAiFailure(parsed.reason || "Missing price."),
+        reasonCode:
+          reasonCode === "MISSING_PRODUCT_AND_PRICE" && hasExplicitUsdPrice(cleanInput)
+            ? "MISSING_PRODUCT"
+            : reasonCode,
       };
     }
 
     const validated = validateAiExtraction(parsed);
+    if (isGenericProductName(validated.productName)) {
+      return {
+        ok: false,
+        reason: "Missing product. Please specify what you are selling.",
+        reasonCode: "MISSING_PRODUCT",
+      };
+    }
+
     return {
       ok: true,
       ...validated,

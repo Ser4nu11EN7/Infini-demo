@@ -44,7 +44,13 @@ export async function POST(request: Request) {
     throw error;
   }
 
-  const payload = JSON.parse(rawBody) as Record<string, unknown>;
+  let payload: Record<string, unknown>;
+  try {
+    payload = JSON.parse(rawBody) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ ok: false, reason: "Invalid JSON payload." }, { status: 400 });
+  }
+
   const data = pickWebhookData(payload);
   const order = await prisma.order.findFirst({
     where: {
@@ -60,6 +66,10 @@ export async function POST(request: Request) {
   }
 
   const normalized = normalizeInfiniStatus(data.status);
+  if (order.status === "paid" && normalized.status !== "paid") {
+    return NextResponse.json({ ok: true, ignoredRegression: true });
+  }
+
   const becamePaid = order.status !== "paid" && normalized.status === "paid";
   await prisma.order.update({
     where: { id: order.id },

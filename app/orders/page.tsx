@@ -21,6 +21,7 @@ type OrderRow = {
 
 const ORDERS_CACHE_KEY = "infini_demo_orders_cache_v1";
 const ORDERS_PER_PAGE = 10;
+const ORDERS_CACHE_TTL_MS = 10 * 1000;
 
 function shortRef(value: string) {
   return value.length > 14 ? `${value.slice(0, 8)}...${value.slice(-4)}` : value;
@@ -35,7 +36,11 @@ function readOrdersCache() {
     if (!cached) {
       return null;
     }
-    const parsed = JSON.parse(cached) as { orders?: OrderRow[] };
+    const parsed = JSON.parse(cached) as { orders?: OrderRow[]; cachedAt?: number };
+    if (!parsed.cachedAt || Date.now() - parsed.cachedAt > ORDERS_CACHE_TTL_MS) {
+      window.sessionStorage.removeItem(ORDERS_CACHE_KEY);
+      return null;
+    }
     return Array.isArray(parsed.orders) ? parsed.orders : null;
   } catch {
     return null;

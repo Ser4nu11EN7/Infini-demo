@@ -6,6 +6,7 @@ export const supportedCurrencies = ["USD"] as const;
 
 export type SupportedCurrency = (typeof supportedCurrencies)[number];
 
+export const minCheckoutAmount = new Decimal("0.1");
 const pricePattern = /^(?:0|[1-9]\d*)(?:\.\d{1,6})?$/;
 const chineseNumberPattern = "[零〇一二两三四五六七八九十百千万]+";
 const unsupportedCurrencyCodes =
@@ -69,8 +70,14 @@ export function validateRawRequestForPayment(input: string) {
   );
   for (const match of amountMatches) {
     const rawAmount = match[1] || match[2];
-    if (rawAmount && new Decimal(rawAmount).gt(100000)) {
-      throw new Error("Price must be 100000 USD or less.");
+    if (rawAmount) {
+      const amount = new Decimal(rawAmount);
+      if (amount.lt(minCheckoutAmount)) {
+        throw new Error("Price must be at least 0.1 USD.");
+      }
+      if (amount.gt(100000)) {
+        throw new Error("Price must be 100000 USD or less.");
+      }
     }
   }
 }
@@ -103,6 +110,9 @@ export function normalizePrice(price: string): string {
   const decimal = new Decimal(price);
   if (!decimal.isFinite() || decimal.lte(0)) {
     throw new Error("Price must be greater than zero.");
+  }
+  if (decimal.lt(minCheckoutAmount)) {
+    throw new Error("Price must be at least 0.1 USD.");
   }
   if (decimal.gt(100000)) {
     throw new Error("Price must be 100000 or less.");

@@ -24,6 +24,7 @@ type CheckoutResult = {
 
 type EditingField = "productName" | "amount" | null;
 
+const ordersCacheKey = "infini_demo_orders_cache_v1";
 const reviewerToolsEnabled = process.env.NEXT_PUBLIC_ENABLE_REVIEWER_TOOLS === "true";
 
 function randomDelay(minMs: number, maxMs: number) {
@@ -347,6 +348,7 @@ export default function DemoPage() {
       trackClientEvent("reviewer_payment_simulated", {
         orderId: checkoutResult.orderId,
       });
+      sessionStorage.removeItem(ordersCacheKey);
       window.location.href = `/success?orderId=${encodeURIComponent(checkoutResult.orderId)}`;
     } catch {
       setError(t.demo.simulatePaidError);
